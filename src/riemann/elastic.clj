@@ -1,13 +1,12 @@
 (ns riemann.elastic
-  (:require [riemann.streams :as streams]
+  (:require [clj-json.core :as json]
             [clj-time.format]
             [clj-time.core]
             [clj-time.coerce]
+            [clojure.edn :as edn]
             [clojurewerkz.elastisch.rest.bulk :as eb]
             [clojurewerkz.elastisch.rest :as esr]
-            [clojurewerkz.elastisch.rest.document :as esd]
-            [clojurewerkz.elastisch.rest.index :as esi]
-            [clojurewerkz.elastisch.rest.response :as esrsp]))
+            [riemann.streams :as streams]))
 
 
 (def format-logstash
@@ -32,10 +31,21 @@
         (dissoc :ttl)
         (assoc "@timestamp" (iso8601 time)))))
 
+
+(defn massage-event [event]
+  (into {}
+        (for [[k v] event
+              :when v]
+          (cond
+           (.startsWith (name k) "_")
+           [(.substring (name k) 1) (edn/read-string v)]
+           :else
+           [k v]))))
+
 (defn elastic-event [event]
   (reset! last-event event)
-  (-> (into {} event)
-      ;; strip nil values
+  (-> event
+      massage-event
       stashify-timestamp))
 
 (defn riemann-to-elasticsearch [events]
