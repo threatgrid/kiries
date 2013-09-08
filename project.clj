@@ -4,6 +4,7 @@
                  [riemann "0.2.2"]
                  [clojurewerkz/elastisch "1.2.0"]
                  [clj-time "0.6.0"]]
-  :main riemann.bin)
+  :main riemann.bin
+  :aliases {"elastic" ["trampoline" "run" "-m" "riemann.elastic.configure"]})
 
 

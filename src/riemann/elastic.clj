@@ -6,8 +6,8 @@
             [clojure.edn :as edn]
             [clojurewerkz.elastisch.rest.bulk :as eb]
             [clojurewerkz.elastisch.rest :as esr]
+            [riemann.elastic.configure :as configure]
             [riemann.streams :as streams]))
-
 
 (def format-logstash
   (clj-time.format/formatter "'logstash'-yyyy.MM.dd"))
@@ -54,8 +54,8 @@
        (remove streams/expired?)
        (map elastic-event)))
 
-(defn elasticsearch [url]
-  (esr/connect! url)
+(defn elasticsearch []
+  (configure/connect!)
   (fn [es-type]
     (fn [events]
       (let [es-index (index-name-for-date)
