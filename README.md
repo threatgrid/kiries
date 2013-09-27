@@ -53,4 +53,3 @@ serve up Kibana using an internal webserver, whose default port is
 
 	bin/kiries   # call with -? for cmd line args
 
-
