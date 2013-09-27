@@ -1,18 +1,33 @@
-## Kiries - KIbana, RIemann and ElasticSearch, glued together with Clojure
+# Kiries - KIbana, RIemann and ElasticSearch
 
-We wanted a point-and-shoot realtime trend analysis toolkit
+We wanted a point-and-shoot realtime trend analysis dashboard for our
+Riemann-based cluster monitoring, as well as for other generic
+time-series data sources.  So, we glued our favorite tools together
+with Clojure.
 
 We include the following versions of the third-party components
 
-* Elastic Search 0.90.5
-* Kibana 3.0.0milestone3
-* Riemann 0.2.2
+* [Kibana](http://www.elasticsearch.org/overview/kibana/) (3.0.0milestone3)
+* [Riemann](http://riemann.io) (0.2.2)
+* [Elastic Search](http://www.elasticsearch.org) (0.90.3)
 
 Those teams have all done incredible work!
 
 Any clojure libraries or dependencies are described in the project.clj
 
-## Installation
+# Quickstart
+
+__WARNING__ : Kiries will open several publically accesible ports on
+your host.  Read the Installation instructions below for how to change
+these.
+
+Unpack an archive or checkout the repo and run:
+
+    bin/kiries
+
+And point your browser at <http://localhost:9090/index.html>
+
+# Installation
 
 Unpack the archive, or open up the git repository, and you will see a
 directory structure like this:
@@ -24,8 +39,7 @@ directory structure like this:
  * `bin` -- helper shell scripts
  * `lib` -- libraries and jars
 
-__WARNING__ : Kiries will open several ports on your host, which have
-no authentication or access control. The default ports are:
+__WARNING__ : Kiries will open several publically accesible ports on your host.
 
  * 9090 -- Webserver, serving up Kibana
  * 9200,9300 -- ElasticSearch HTTP and Native APIs
@@ -49,7 +63,8 @@ Kibana is a series of HTML and Javascript files served up from
 serve up Kibana using an internal webserver, whose default port is
 `9090` and will listen on all interfaces.
 
-## Usage
+# Usage
 
 	bin/kiries   # call with -? for cmd line args
 
+And point your browser at <http://localhost:9090/index.html>
