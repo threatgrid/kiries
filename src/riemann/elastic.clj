@@ -11,6 +11,7 @@
 
 (def format-logstash
   (clj-time.format/formatter "'logstash'-yyyy.MM.dd"))
+
 (def format-iso8601
   (clj-time.format/with-zone (clj-time.format/formatters :date-time-no-ms)
     clj-time.core/utc))
@@ -29,8 +30,7 @@
     (-> event
         (dissoc :time)
         (dissoc :ttl)
-        (assoc "@timestamp" (iso8601 time)))))
-
+        (assoc "@timestamp" (iso8601 (long time))))))
 
 (defn massage-event [event]
   (into {}
@@ -54,8 +54,8 @@
        (remove streams/expired?)
        (map elastic-event)))
 
-(defn elasticsearch []
-  (configure/connect!)
+(defn elasticsearch [& argv]
+  (esr/connect! (first argv))
   (fn [es-type]
     (fn [events]
       (let [es-index (index-name-for-date)
