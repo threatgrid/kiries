@@ -14,6 +14,7 @@
                  [hiccup "1.0.4"]
                  [org.markdownj/markdownj "0.3.0-1.0.2b4"]
                  [ring/ring-core "1.2.0"]
+                 [ring/ring-devel "1.2.0"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  
                  [clojure-csv/clojure-csv "1.3.2"]
