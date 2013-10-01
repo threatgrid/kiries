@@ -5,6 +5,7 @@
   (:use ring.adapter.jetty)
   (:import com.petebevin.markdown.MarkdownProcessor)
   (:require
+   [kiries.layout :as layout]
    [ring.util.response :as resp]
    [compojure.route :as route]
    [compojure.handler :as handler]))
@@ -27,20 +28,17 @@
 (defroutes main-routes
   (GET "/" []  (resp/redirect "/index.html"))
   (GET "/index.html" []
-       (markdown-resource-as-html
-        (clojure.java.io/resource "htdocs/index.md")))
-  (GET "/README.html" []
-       (markdown-resource-as-html
-        (clojure.java.io/resource "README.md")))
+       (layout/full-layout "Welcome to Kiries"
+                           (markdown-resource-as-html
+                            (clojure.java.io/resource "htdocs/index.md"))))
   
   (GET "/doc/:file.html" [file] (doc-html file))
 
-
   ;; Map kibana into web space
-  (route/files "/kibana" {:root "htdocs/kibana"})
+  (route/resources "/kibana/" {:root "htdocs/kibana"})
 
   ;; Point to our bundled installation of ElasticSearch HQ
-  (route/files "/HQ" {:root "htdocs/royrusso-elasticsearch-HQ-c321806"})
+  (route/resources "/HQ/" {:root "htdocs/royrusso-elasticsearch-HQ-c321806"})
 
 
   (route/not-found "<h1>Page not found</h1>"))

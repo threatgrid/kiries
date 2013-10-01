@@ -12,5 +12,7 @@ Once you have data loaded, you can view it With [Kibana](/kibana/index.html).
 
 ## Managing ElasticSearch
 
+We've bundled [ElasticSearch HQ](/HQ/index.html), a great ES cluster
+management plugin.
 
 

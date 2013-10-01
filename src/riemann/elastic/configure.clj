@@ -18,12 +18,6 @@
 
 ;; ----------------------------------------
 ;; index creation
-(defn resource-as-json [resource-name]
-  (json/decode (slurp (io/resource resource-name))))
-
-(defn create-index-template [template-name mapping-file]
-  (api/put (api/index-template-url template-name)
-           :body (resource-as-json mapping-file)))
 
 
 ;; ----------------------------------------
