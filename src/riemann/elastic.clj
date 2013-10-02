@@ -34,12 +34,25 @@
   (clj-time.format/unparse format-iso8601
                            (clj-time.coerce/from-long (* 1000 event-s))))
 
+(defn safe-iso8601 [event-s]
+  (try (iso8601 event-s)
+    (catch Exception e
+      (warn "Unable to parse iso8601 input: " event-s)
+      (clj-time.format/unparse format-iso8601 (clj-time.core/now)))))
+
 (defn stashify-timestamp [event]
   (let [time (:time event)]
     (-> event
         (dissoc :time)
         (dissoc :ttl)
-        (assoc "@timestamp" (iso8601 (long time))))))
+        (assoc "@timestamp" (safe-iso8601 (long time))))))
+
+(defn edn-safe-read [v]
+  (try
+    (edn/read-string v)
+    (catch Exception e
+      (warn "Unable to read supposed EDN form: " v)
+      "UNREADABLE")))
 
 (defn massage-event [event]
   (into {}
@@ -47,7 +60,7 @@
               :when v]
           (cond
            (.startsWith (name k) "_")
-           [(.substring (name k) 1) (edn/read-string v)]
+           [(.substring (name k) 1) (edn-safe-read v)]
            :else
            [k v]))))
 
