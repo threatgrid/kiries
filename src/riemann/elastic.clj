@@ -10,7 +10,7 @@
             [clojurewerkz.elastisch.rest :as esr]
             [riemann.streams :as streams]))
 
-(defn make-index-timestamper [index period]
+(defn ^{:private true} make-index-timestamper [index period]
   (let [formatter (clj-time.format/formatter (str "'" index "'"
                                   (cond
                                    (= period :day)
@@ -26,35 +26,36 @@
     (fn [date]
       (clj-time.format/unparse formatter date))))
 
-(def format-iso8601
+(def ^{:private true} format-iso8601
   (clj-time.format/with-zone (clj-time.format/formatters :date-time-no-ms)
     clj-time.core/utc))
 
-(defn iso8601 [event-s]
+(defn ^{:private true} iso8601 [event-s]
   (clj-time.format/unparse format-iso8601
                            (clj-time.coerce/from-long (* 1000 event-s))))
 
-(defn safe-iso8601 [event-s]
+(defn ^{:private true} safe-iso8601 [event-s]
   (try (iso8601 event-s)
     (catch Exception e
       (warn "Unable to parse iso8601 input: " event-s)
       (clj-time.format/unparse format-iso8601 (clj-time.core/now)))))
 
-(defn stashify-timestamp [event]
-  (let [time (:time event)]
-    (-> event
-        (dissoc :time)
-        (dissoc :ttl)
-        (assoc "@timestamp" (safe-iso8601 (long time))))))
+(defn ^{:private true} stashify-timestamp [event]
+  (->  (if-not (get event "@timestamp")
+         (let [time (:time event)]
+           (assoc event "@timestamp" (safe-iso8601 (long time))))
+         event)
+       (dissoc :time)
+       (dissoc :ttl)))
 
-(defn edn-safe-read [v]
+(defn ^{:private true} edn-safe-read [v]
   (try
     (edn/read-string v)
     (catch Exception e
-      (warn "Unable to read supposed EDN form: " v)
-      "UNREADABLE")))
+      (warn "Unable to read supposed EDN form with value: " v)
+      v)))
 
-(defn massage-event [event]
+(defn ^{:private true} massage-event [event]
   (into {}
         (for [[k v] event
               :when v]
@@ -64,24 +65,47 @@
            :else
            [k v]))))
 
-(defn elastic-event [event]
+(defn ^{:private true} elastic-event [event]
   (-> event
       massage-event
       stashify-timestamp))
 
-(defn riemann-to-elasticsearch [events]
+(defn ^{:private true} riemann-to-elasticsearch [events]
   (->> [events]
        flatten
        (remove streams/expired?)
        (map elastic-event)))
 
-(defn es-connect [& argv]
+(defn es-connect
+  "Connects to the ElasticSearch node.  The optional argument is a url
+  for the node, which defaults to `http://localhost:9200`.  This must
+  be called before any es-* functions can be used."
+  [& argv]
   (esr/connect! (or (first argv) "http://localhost:9200")))
 
-(defn es-index [doc-type & {:keys [index
-                                   timestamping]
-                            :or {index "logstash"
-                                 timestamping :day}}]
+(defn es-index
+  "A function which takes a sequence of events, and indexes them in
+  ElasticSearch.  It will set the `_type` field of the event to the
+  value of `doc-type`, which tells ES which mapping to use for the
+  event.
+
+  The :index argument defaults to \"logstash\" for Kibana
+  compatability.  It's the root ES index name that this event will be
+  indexed within.
+  
+  The :timestamping argument, default to :day and it controls the time
+  range component of the index name.  Acceptable values
+  are :hour, :day, :week, :month and :year.
+
+  Events will be massages to conform to Kubana expections.  This means
+  that the `@timestamp` field will be set if not found, based on the
+  `time` field of the event.  The `ttl` field will be removed, as it's
+  internal to Riemann.  Lastly, any fields starting with an `_` will
+  have their value parsed as EDN.
+"
+  [doc-type & {:keys [index timestamping]
+               :or {index "logstash"
+                    timestamping :day}}]
   (let [index-namer (make-index-timestamper index timestamping)]
     (fn [events]
       (let [index (index-namer (clj-time.core/now))
@@ -92,11 +116,11 @@
             (info "elasticized" (count (:items res)) "items in " (:took res) "ms")
             res))))))
 
-(defn resource-as-json [resource-name]
+(defn ^{:private true} resource-as-json [resource-name]
   (json/parse-string (slurp (io/resource resource-name))))
 
 
-(defn file-as-json [file-name]
+(defn ^{:private true} file-as-json [file-name]
   (try
     (json/parse-string (slurp file-name))
     (catch Exception e
@@ -104,7 +128,9 @@
       (throw e))))
 
 
-(defn load-index-template [template-name mapping-file]
+(defn load-index-template 
+  "Loads the file into ElasticSearch as an index template."
+  [template-name mapping-file]
   (esr/put (esr/index-template-url template-name)
            :body (file-as-json mapping-file)))
 

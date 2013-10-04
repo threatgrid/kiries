@@ -16,7 +16,11 @@
                  [ring/ring-devel "1.2.0"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  
-                 [clojure-csv/clojure-csv "1.3.2"]]
+                 [clojure-csv/clojure-csv "1.3.2"]
+
+                 [metrics-clojure "1.0.1"]
+
+                 ]
   
   :resource-paths ["resources"]
   ;;:jar-exclusions [#"^config"]
