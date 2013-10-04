@@ -1,0 +1,36 @@
+(ns kiries.jvm
+  (:import [com.yammer.metrics.core MetricPredicate]))
+
+;; ----------------------------------------
+
+(def vm-stats (com.yammer.metrics.core.VirtualMachineMetrics/getInstance))
+
+(defn vm-metrics []
+  (let [epoch
+        (long (/ (.time clock) 1000))
+
+        metrics
+        (concat
+         [{:service "jvm.memory.heap-usage" :metric (.heapUsage vm-stats)}
+          {:service "jvm.memory.non-heap-usage" :metric (.nonHeapUsage vm-stats)}
+          {:service "jvm.thread.daemon-count" :metric (.daemonThreadCount vm-stats)}
+          {:service "jvm.thread.count" :metric (.threadCount vm-stats)}
+          {:service "jvm.uptime" :metric (.uptime vm-stats)}
+          {:service "jvm.fd-usage" :metric (.fileDescriptorUsage vm-stats)}]
+         (for [[k v] (.memoryPoolUsage vm-stats)]
+           {:service (str "jvm.memory.pool-usage." k) :metric v})
+         (for [[k v] (.threadStatePercentages vm-stats)]
+           {:service (str "jvm.thread.state." (.toLowerCase (str k))) :metric v})
+         (for [[k v] (.garbageCollectors vm-stats)]
+           {:service (str "jvm.gc." k ".time") :metric (.getTime v java.util.concurrent.TimeUnit/MILLISECONDS)})
+         (for [[k v] (.garbageCollectors vm-stats)]
+           {:service (str "jvm.gc." k ".runs") :metric (.getRuns v)}))]
+    (map #(assoc % :time epoch) metrics)))
+
+(defn jvm-metrics-thread [every-n-sec]
+  (while true
+    (try
+      (send-events (vm-metrics))
+      (catch java.io.IOException e
+        (warn "I'm a deaf mute talking to myself apparently.")))
+    (Thread/sleep (* 1000 every-n-sec))))
