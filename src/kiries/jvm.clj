@@ -3,6 +3,7 @@
 
 ;; ----------------------------------------
 
+(def clock (com.yammer.metrics.core.Clock/defaultClock))
 (def vm-stats (com.yammer.metrics.core.VirtualMachineMetrics/getInstance))
 
 (defn vm-metrics []
@@ -26,11 +27,3 @@
          (for [[k v] (.garbageCollectors vm-stats)]
            {:service (str "jvm.gc." k ".runs") :metric (.getRuns v)}))]
     (map #(assoc % :time epoch) metrics)))
-
-(defn jvm-metrics-thread [every-n-sec]
-  (while true
-    (try
-      (send-events (vm-metrics))
-      (catch java.io.IOException e
-        (warn "I'm a deaf mute talking to myself apparently.")))
-    (Thread/sleep (* 1000 every-n-sec))))
