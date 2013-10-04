@@ -33,7 +33,7 @@ Unpack the archive, or open up the git repository, and you will see a
 directory structure like this:
 
  * `config` -- configuration files for riemann and elasticsearch
- * `htdocs` -- Web documents, including kibana, and it configuration in `kabana/config.js`
+ * `resources/htdocs` -- Web documents, including kibana, and it configuration in `kabana/config.js`
  * `src` -- Kiries src files
  * `logs` -- log files
  * `bin` -- helper shell scripts
