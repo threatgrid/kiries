@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Kiries by threatgrid</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/threatgrid/kiries">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/threatgrid/kiries/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/threatgrid/kiries/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Kiries</h1>
+          <p>A turn-key deployment of Kibana, Riemann and ElasticSearch</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/threatgrid">threatgrid</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="kiries---kibana-riemann-and-elasticsearch" class="anchor" href="#kiries---kibana-riemann-and-elasticsearch"><span class="octicon octicon-link"></span></a>Kiries - KIbana, RIemann and ElasticSearch</h1>
+
+<p>We wanted a point-and-shoot real-time trend analysis dashboard for our
+Riemann-based cluster monitoring, as well as for other generic
+time-series data sources.  So, we glued our favorite tools together
+with Clojure.</p>
+
+<p>We include the following versions of the third-party components</p>
+
+<ul>
+<li>
+<a href="http://www.elasticsearch.org/overview/kibana/">Kibana</a> (3.0.0milestone3)</li>
+<li>
+<a href="http://riemann.io">Riemann</a> (0.2.2)</li>
+<li>
+<a href="http://www.elasticsearch.org">Elastic Search</a> (0.90.3)</li>
+<li>
+<a href="http://elastichq.org">Elastic HQ</a> (c321806)</li>
+</ul><p>Those projects have all done incredible work, and Kiries is just a
+little glue and some documentation tying them together.</p>
+
+<p>Any clojure dependencies are described in the <code>project.clj</code>.</p>
+
+<p>Check out the <a href="resources/htdocs/index.md">User Guide</a> for more details.</p>
+
+<h1>
+<a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>Quickstart</h1>
+
+<p><strong>WARNING</strong> : Kiries will open publicly accessible ports on your host.
+Read the installation instructions below, or live dangerously</p>
+
+<p>Unpack an archive or checkout the repo and run:</p>
+
+<pre><code>bin/kiries
+</code></pre>
+
+<p>And point your browser at <a href="http://localhost:9090/index.html">http://localhost:9090/index.html</a></p>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>Unpack the archive, or open up the git repository, and you will see a
+directory structure like this:</p>
+
+<ul>
+<li>
+<code>config</code> -- configuration files for riemann and ElasticSearch</li>
+<li>
+<code>resources/htdocs</code> -- Web documents, including Kibana, and it configuration in <code>kibana/config.js</code>
+</li>
+<li>
+<code>src</code> -- Kiries src files</li>
+<li>
+<code>logs</code> -- log files</li>
+<li>
+<code>bin</code> -- helper shell scripts</li>
+<li>
+<code>lib</code> -- libraries and jars</li>
+</ul><p><strong>WARNING</strong> : Kiries will open several publically accesible ports on your host.</p>
+
+<ul>
+<li>9090 -- Webserver, serving up Kibana and docs</li>
+<li>9200,9300 -- ElasticSearch HTTP and Native APIs</li>
+<li>5555 -- Riemann listeners (tcp and udp)</li>
+</ul><p>Read the following and take precautions as you see fit.</p>
+
+<p>By default, Kiries will start up Riemann tcp and udp servers on port
+<code>5555</code>.  It will index all events it receives into ElasticSearch.  To
+customize this behavior, edit the <code>config/riemann.config</code> file.</p>
+
+<p>Kiries will also start up ElasticSearch listening on the default
+ports.  ES will store it's data in the <code>data</code> directory (relative to
+where the java runtime was started from.  To customize the ES
+behavior, edit the <code>config/elasticsearch.yml</code> file.  If you customize
+the http host and port, be sure to update the Riemann and Kibana
+configurations.</p>
+
+<p>Kibana is a series of HTML and Javascript files served up from
+<code>htdocs</code> and it's configuration is in <code>htdocs/kibana/config.js</code>.  We
+serve up Kibana using an internal webserver, whose default port is
+<code>9090</code> and will listen on all interfaces.</p>
+
+<h1>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
+
+<pre><code>bin/kiries   # call with -? for cmd line args
+</code></pre>
+
+<p>And point your browser at <a href="http://localhost:9090/index.html">http://localhost:9090/index.html</a></p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
