@@ -1,0 +1,245 @@
+{
+  "title": "WTF Dashboard",
+  "services": {
+    "filter": {
+      "idQueue": [
+        3,
+        4
+      ],
+      "list": {
+        "0": {
+          "from": "2013-10-05T18:25:07.237Z",
+          "to": "2013-10-05T18:40:07.238Z",
+          "field": "@timestamp",
+          "type": "time",
+          "mandate": "must",
+          "active": true,
+          "alias": "",
+          "id": 0
+        },
+        "1": {
+          "type": "field",
+          "field": "service",
+          "query": "*",
+          "mandate": "must",
+          "active": true,
+          "alias": "",
+          "id": 1
+        }
+      },
+      "ids": [
+        1,
+        0
+      ]
+    },
+    "query": {
+      "idQueue": [],
+      "list": {
+        "0": {
+          "query": "*",
+          "alias": "",
+          "color": "#7EB26D",
+          "pin": false,
+          "id": 0,
+          "type": "lucene"
+        }
+      },
+      "ids": [
+        0
+      ]
+    }
+  },
+  "rows": [
+    {
+      "title": "Options",
+      "height": "40px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 3,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "queries": {
+            "mode": "all",
+            "ids": []
+          },
+          "field": "_type",
+          "exclude": [],
+          "missing": true,
+          "other": true,
+          "size": 10,
+          "order": "count",
+          "style": {
+            "font-size": "10pt"
+          },
+          "donut": false,
+          "tilt": false,
+          "labels": true,
+          "arrangement": "horizontal",
+          "chart": "bar",
+          "counter_pos": "above",
+          "spyable": true,
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "This dashboard displays a table of events in the target index, so you can figure out the events look when indexed, and start building a more appropriate dashboard for them.  You can click on the settings icon in the header to change the target index."
+        },
+        {
+          "error": "",
+          "span": 6,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "timepicker",
+          "mode": "relative",
+          "time_options": [
+            "5m",
+            "15m",
+            "1h",
+            "6h",
+            "12h",
+            "24h",
+            "2d",
+            "7d",
+            "30d"
+          ],
+          "timespan": "15m",
+          "timefield": "@timestamp",
+          "timeformat": "",
+          "refresh": {
+            "enable": true,
+            "interval": 15,
+            "min": 15
+          },
+          "filter_id": 0,
+          "status": "Stable"
+        },
+        {
+          "error": false,
+          "span": 3,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "dashcontrol",
+          "save": {
+            "gist": false,
+            "elasticsearch": true,
+            "local": true,
+            "default": true
+          },
+          "load": {
+            "gist": true,
+            "elasticsearch": true,
+            "local": true
+          },
+          "hide_control": false,
+          "elasticsearch_size": 20,
+          "temp": true,
+          "temp_ttl": "30d",
+          "ttl_enable": true
+        }
+      ]
+    },
+    {
+      "title": "Filters",
+      "height": "150px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 3,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "You can filter events by clicking on a value in the table, and then clicking the magnifying glass.  It will then apply a filter to all your events, showing only those that match that value.  The filter will be displayed here, where you can then edit it.",
+          "style": {}
+        },
+        {
+          "error": false,
+          "span": 6,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "filtering",
+          "title": ""
+        }
+      ]
+    },
+    {
+      "title": "Events",
+      "height": "350px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 12,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "table",
+          "size": 50,
+          "pages": 10,
+          "offset": 0,
+          "sort": [
+            "@timestamp",
+            "desc"
+          ],
+          "style": {
+            "font-size": "9pt"
+          },
+          "overflow": "min-height",
+          "fields": [
+            "@timestamp",
+            "service",
+            "metric",
+            "state",
+            "description",
+            "tags"
+          ],
+          "highlight": [
+            "metric",
+            "service"
+          ],
+          "sortable": true,
+          "header": true,
+          "paging": true,
+          "spyable": true,
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "field_list": true,
+          "status": "Stable",
+          "trimFactor": 300,
+          "title": ""
+        }
+      ]
+    }
+  ],
+  "editable": true,
+  "index": {
+    "interval": "day",
+    "pattern": "[logstash-]YYYY.MM.DD",
+    "default": "NO_TIME_FILTER_OR_INDEX_PATTERN_NOT_MATCHED"
+  },
+  "style": "dark"
+}
