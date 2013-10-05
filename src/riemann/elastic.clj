@@ -113,7 +113,7 @@
                                           (riemann-to-elasticsearch events))]
         (when (seq bulk-create-items)
           (let [res (eb/bulk-with-index index bulk-create-items)]
-            (info "elasticized" (count (:items res)) "items in " (:took res) "ms")
+            (info "elasticized" (count (:items res)) "items to index " index "in " (:took res) "ms")
             res))))))
 
 (defn ^{:private true} resource-as-json [resource-name]
