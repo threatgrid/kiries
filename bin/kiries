@@ -1,4 +1,4 @@
 #!/bin/sh
 
-bin/lein run $@
+bin/lein run -- $@
 
