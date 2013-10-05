@@ -1,6 +1,6 @@
 # Kiries - KIbana, RIemann and ElasticSearch
 
-We wanted a point-and-shoot realtime trend analysis dashboard for our
+We wanted a point-and-shoot real-time trend analysis dashboard for our
 Riemann-based cluster monitoring, as well as for other generic
 time-series data sources.  So, we glued our favorite tools together
 with Clojure.
@@ -10,16 +10,19 @@ We include the following versions of the third-party components
 * [Kibana](http://www.elasticsearch.org/overview/kibana/) (3.0.0milestone3)
 * [Riemann](http://riemann.io) (0.2.2)
 * [Elastic Search](http://www.elasticsearch.org) (0.90.3)
+* [Elastic HQ](http://elastichq.org) (c321806)
 
-Those teams have all done incredible work!
+Those projects have all done incredible work, and Kiries is just a
+little glue and some documentation tying them together.
 
-Any clojure libraries or dependencies are described in the project.clj
+Any clojure dependencies are described in the `project.clj`.
+
+Check out the [User Guide](resources/htdocs/index.md) for more details.
 
 # Quickstart
 
-__WARNING__ : Kiries will open several publically accesible ports on
-your host.  Read the Installation instructions below for how to change
-these.
+__WARNING__ : Kiries will open publicly accessible ports on your host.
+Read the installation instructions below, or live dangerously
 
 Unpack an archive or checkout the repo and run:
 
@@ -32,8 +35,8 @@ And point your browser at <http://localhost:9090/index.html>
 Unpack the archive, or open up the git repository, and you will see a
 directory structure like this:
 
- * `config` -- configuration files for riemann and elasticsearch
- * `resources/htdocs` -- Web documents, including kibana, and it configuration in `kabana/config.js`
+ * `config` -- configuration files for riemann and ElasticSearch
+ * `resources/htdocs` -- Web documents, including Kibana, and it configuration in `kibana/config.js`
  * `src` -- Kiries src files
  * `logs` -- log files
  * `bin` -- helper shell scripts
@@ -41,14 +44,14 @@ directory structure like this:
 
 __WARNING__ : Kiries will open several publically accesible ports on your host.
 
- * 9090 -- Webserver, serving up Kibana
+ * 9090 -- Webserver, serving up Kibana and docs
  * 9200,9300 -- ElasticSearch HTTP and Native APIs
  * 5555 -- Riemann listeners (tcp and udp)
 
 Read the following and take precautions as you see fit.
 
 By default, Kiries will start up Riemann tcp and udp servers on port
-`5555`.  It will index all events it recieves into ElasticSearch.  To
+`5555`.  It will index all events it receives into ElasticSearch.  To
 customize this behavior, edit the `config/riemann.config` file.
 
 Kiries will also start up ElasticSearch listening on the default
