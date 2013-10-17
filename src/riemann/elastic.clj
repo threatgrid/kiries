@@ -120,12 +120,19 @@
         (doseq [index (keys esets)]
           (let [raw (get esets index)
                 bulk-create-items
-                (interleave (repeat {:create {:_type doc-type}})
+                (interleave (map #(if-let [id (get % "_id")]
+                                    {:create {:_type doc-type :_id id}}
+                                    {:create {:_type doc-type}}
+                                    )
+                                 raw)
                             raw)]
             (when (seq bulk-create-items)
-              (let [res (eb/bulk-with-index index bulk-create-items)]
-                (info "elasticized" (count (:items res)) "items to index " index "in " (:took res) "ms")
-                res))))))))
+              (try
+                (let [res (eb/bulk-with-index index bulk-create-items)]
+                  (info "elasticized" (count (:items res)) "items to index " index "in " (:took res) "ms")
+                  (info "Results: " res))
+                (catch Exception e
+                  (error "Unable to bulk index:" e))))))))))
 
 (defn ^{:private true} resource-as-json [resource-name]
   (json/parse-string (slurp (io/resource resource-name))))
