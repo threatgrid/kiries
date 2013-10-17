@@ -10,7 +10,7 @@
             [clojurewerkz.elastisch.rest :as esr]
             [riemann.streams :as streams]))
 
-(defn ^{:private true} make-index-timestamper [index period]
+(defn make-index-timestamper [index period]
   (let [formatter (clj-time.format/formatter (str "'" index "'"
                                   (cond
                                    (= period :day)
@@ -60,21 +60,24 @@
         (for [[k v] event
               :when v]
           (cond
+           (= (name k) "_id") [k v]
            (.startsWith (name k) "_")
            [(.substring (name k) 1) (edn-safe-read v)]
            :else
            [k v]))))
 
-(defn ^{:private true} elastic-event [event]
-  (-> event
-      massage-event
-      stashify-timestamp))
+(defn ^{:private true} elastic-event [event massage]
+  (let [e (-> event
+              stashify-timestamp)]
+    (if massage
+      (massage-event e)
+      e)))
 
-(defn ^{:private true} riemann-to-elasticsearch [events]
+(defn ^{:private true} riemann-to-elasticsearch [events massage]
   (->> [events]
        flatten
        (remove streams/expired?)
-       (map elastic-event)))
+       (map #(elastic-event % massage))))
 
 (defn es-connect
   "Connects to the ElasticSearch node.  The optional argument is a url
@@ -103,18 +106,29 @@
   internal to Riemann.  Lastly, any fields starting with an `_` will
   have their value parsed as EDN.
 "
-  [doc-type & {:keys [index timestamping]
+  [doc-type & {:keys [index timestamping massage]
                :or {index "logstash"
+                    massage true
                     timestamping :day}}]
   (let [index-namer (make-index-timestamper index timestamping)]
     (fn [events]
-      (let [index (index-namer (clj-time.core/now))
-            bulk-create-items (interleave (repeat {:create {:_type doc-type}})
-                                          (riemann-to-elasticsearch events))]
-        (when (seq bulk-create-items)
-          (let [res (eb/bulk-with-index index bulk-create-items)]
-            (info "elasticized" (count (:items res)) "items to index " index "in " (:took res) "ms")
-            res))))))
+      (let [esets (group-by (fn [e] 
+                              (index-namer 
+                               (clj-time.format/parse format-iso8601 
+                                                      (get e "@timestamp"))))
+                            (riemann-to-elasticsearch events massage))]
+        (doseq [index (keys esets)]
+          (let [raw (get esets index)
+                bulk-create-items
+                (interleave (map (fn [e]
+                                   {:create {:_type doc-type
+                                             :_id (get e "_id" nil)}})
+                                 raw)
+                            raw)]
+            (when (seq bulk-create-items)
+              (let [res (eb/bulk-with-index index bulk-create-items)]
+                (info "elasticized" (count (:items res)) "items to index " index "in " (:took res) "ms")
+                res))))))))
 
 (defn ^{:private true} resource-as-json [resource-name]
   (json/parse-string (slurp (io/resource resource-name))))
@@ -133,8 +147,3 @@
   [template-name mapping-file]
   (esr/put (esr/index-template-url template-name)
            :body (file-as-json mapping-file)))
-
-
-
-
-
