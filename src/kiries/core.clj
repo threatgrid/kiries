@@ -62,6 +62,7 @@
     (when (:web options)
       (print "Starting web server for Kibana")
       (web/start :port (:port options)
+                 :join? false
                  :host (:host options)))))
     
 
