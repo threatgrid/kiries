@@ -128,9 +128,13 @@
                             raw)]
             (when (seq bulk-create-items)
               (try
-                (let [res (eb/bulk-with-index index bulk-create-items)]
-                  (info "elasticized" (count (:items res)) "items to index " index "in " (:took res) "ms")
-                  (info "Results: " res))
+                (let [res (eb/bulk-with-index index bulk-create-items)
+                      total (count (:items res))
+                      succ (filter :ok (:items res))
+                      failed (filter :error (:items res))]
+                  
+                  (info "elasticized" total "/" (count succ) "/" (count failed) " (total/succ/fail) items to index " index "in " (:took res) "ms")
+                  (debug "Failed: " failed))
                 (catch Exception e
                   (error "Unable to bulk index:" e))))))))))
 
