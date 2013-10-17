@@ -120,10 +120,7 @@
         (doseq [index (keys esets)]
           (let [raw (get esets index)
                 bulk-create-items
-                (interleave (map (fn [e]
-                                   {:create {:_type doc-type
-                                             :_id (get e "_id" nil)}})
-                                 raw)
+                (interleave (repeat {:create {:_type doc-type}})
                             raw)]
             (when (seq bulk-create-items)
               (let [res (eb/bulk-with-index index bulk-create-items)]
