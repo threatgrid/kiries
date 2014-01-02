@@ -25,6 +25,9 @@
                  [cheshire "5.2.0"]
                  [clojure-csv/clojure-csv "1.3.2"]
 
+                 ;; Redis integration
+                 [com.taoensso/carmine "2.4.0"]
+                 
                  ]
   
   :resource-paths ["resources"]
