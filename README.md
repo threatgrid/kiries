@@ -7,10 +7,10 @@ with Clojure.
 
 We include the following versions of the third-party components
 
-* [Kibana](http://www.elasticsearch.org/overview/kibana/) (3.0.0milestone3)
-* [Riemann](http://riemann.io) (0.2.2)
-* [Elastic Search](http://www.elasticsearch.org) (0.90.3)
-* [Elastic HQ](http://elastichq.org) (c321806)
+* [Kibana](http://www.elasticsearch.org/overview/kibana/) (3.1.0)
+* [Riemann](http://riemann.io) (0.2.5)
+* [Elastic Search](http://www.elasticsearch.org) (1.1.1)
+* [Elastic HQ](http://elastichq.org) (ea630c8)
 
 Those projects have all done incredible work, and Kiries is just a
 little glue and some documentation tying them together.
