@@ -37,8 +37,11 @@
   ;; Map kibana into web space
   (route/resources "/kibana/" {:root "htdocs/kibana"})
 
+  ;; Map css into web space
+  (route/resources "/css/" {:root "htdocs/css"})
+
   ;; Point to our bundled installation of ElasticSearch HQ
-  (route/resources "/HQ/" {:root "htdocs/royrusso-elasticsearch-HQ-c321806"})
+  (route/resources "/HQ/" {:root "htdocs/royrusso-elasticsearch-HQ-ea630c8"})
 
 
   (route/not-found "<h1>Page not found</h1>"))
