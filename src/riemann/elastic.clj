@@ -27,7 +27,7 @@
       (clj-time.format/unparse formatter date))))
 
 (def ^{:private true} format-iso8601
-  (clj-time.format/with-zone (clj-time.format/formatters :date-time-no-ms)
+  (clj-time.format/with-zone (clj-time.format/formatters :date-time)
     clj-time.core/utc))
 
 (defn ^{:private true} iso8601 [event-s]
