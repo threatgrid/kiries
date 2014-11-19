@@ -42,9 +42,13 @@
 
 (defn ^{:private true} stashify-timestamp [event]
   (->  (if-not (get event "@timestamp")
-         (let [time (:time event)]
-           (assoc event "@timestamp" (safe-iso8601 (long time))))
+         (let [isotime (:isotime event)]
+           (if-not isotime
+             (let [time (:time event)]
+               (assoc event "@timestamp" (safe-iso8601 (long time))))
+             (assoc event "@timestamp" isotime)))
          event)
+       (dissoc :isotime)
        (dissoc :time)
        (dissoc :ttl)))
 
