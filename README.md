@@ -42,7 +42,7 @@ directory structure like this:
  * `bin` -- helper shell scripts
  * `lib` -- libraries and jars
 
-__WARNING__ : Kiries will open several publically accesible ports on your host.
+__WARNING__ : Kiries will open several publicly accessible ports on your host.
 
  * 9090 -- Webserver, serving up Kibana and docs
  * 9200,9300 -- ElasticSearch HTTP and Native APIs
