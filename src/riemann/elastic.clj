@@ -104,7 +104,7 @@
   range component of the index name.  Acceptable values
   are :hour, :day, :week, :month and :year.
 
-  Events will be massages to conform to Kubana expections.  This means
+  Events will be massages to conform to Kibana expections.  This means
   that the `@timestamp` field will be set if not found, based on the
   `time` field of the event.  The `ttl` field will be removed, as it's
   internal to Riemann.  Lastly, any fields starting with an `_` will
