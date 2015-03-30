@@ -1,4 +1,6 @@
 #!/bin/sh
 
-bin/lein run -- $@
+# Avoid conflicts with plugins in the user's ~/.lein/profiles.clj
+export LEIN_HOME=${KIRIES_LEIN_HOME:-"$HOME/.lein-kiries"}
 
+exec bin/lein run -- "$@"
