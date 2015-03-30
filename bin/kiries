@@ -1,4 +1,3 @@
 #!/bin/sh
 
-bin/lein run -- $@
-
+exec bin/lein run -- "$@"
