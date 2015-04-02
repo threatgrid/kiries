@@ -9,4 +9,5 @@ pom.xml.asc
 *.jar
 *.class
 .lein-*
+.*.sw?
 riemann.log*
