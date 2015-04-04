@@ -32,6 +32,7 @@
   :resource-paths ["resources"]
   ;;:jar-exclusions [#"^config"]
   :main kiries.core
+  :profiles {:uberjar {:aot :all, :uberjar-merge-with {#"^META-INF/services/" [slurp str spit]}}}
   :aliases {"server" ["trampoline" "run" "-m" "kiries.core"]})
 
 
