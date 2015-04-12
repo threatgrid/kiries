@@ -3,14 +3,6 @@
   (:require [taoensso.carmine :as car]
             [clj-json.core :as json]))
 
-(defn publish
-  "Returns a function which publishes a single event as JSON, to the
-  spcified redis server and key."
-  [conn key]
-  (let [f (spublish conn key)]
-    (fn [e]
-      (f [e]))))
-
 (defn spublish
   "Returns a function which takes a sequence of events or other
    values, and publishes them as JSON, to the specified redis server
@@ -33,3 +25,11 @@
                     )
           (catch Exception e
             (warn "Unable to publish" key "to" conn ":" e)))))))
+
+(defn publish
+  "Returns a function which publishes a single event as JSON, to the
+  spcified redis server and key."
+  [conn key]
+  (let [f (spublish conn key)]
+    (fn [e]
+      (f [e]))))
