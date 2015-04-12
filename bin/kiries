@@ -1,6 +1,17 @@
-#!/bin/sh
+#!/bin/bash
+
+shopt -s nullglob
 
 # Avoid conflicts with plugins in the user's ~/.lein/profiles.clj
 export LEIN_HOME=${KIRIES_LEIN_HOME:-"$HOME/.lein-kiries"}
 
-exec bin/lein run -- "$@"
+# Find location of executable; move to base
+source_dir=$(readlink -f "$BASH_SOURCE")
+cd "${source_dir%/bin/*}" || exit
+
+potential_jars=( target/kiries-*standalone.jar )
+if (( ${#potential_jars[@]} == 1 )); then
+    exec java -cp "/usr/share/kiries/resources:$potential_jars" kiries.core "$@"
+else
+    exec bin/lein run -- "$@"
+fi

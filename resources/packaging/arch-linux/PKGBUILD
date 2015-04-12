@@ -1,0 +1,73 @@
+pkgname=kiries
+pkgver=20150330.57.0b1e865
+pkgrel=1
+pkgdesc="Kibana/Riemann/ElasticSearch Deployment"
+arch=( any )
+backup=(
+	etc/kiries/config.js
+	etc/kiries/dashboards/default.json
+	etc/kiries/default-mapping.json
+	etc/kiries/elasticsearch.yml
+	etc/kiries/jvm-metrics.config
+	etc/kiries/riemann-health.config
+	etc/kiries/riemann.config
+)
+license=( EPL ) # some components, but not all, also under Apache license
+install=kiries.install
+
+source=('kiries::git+http://github.com/threatgrid/kiries#branch=master')
+md5sums=( SKIP )
+
+pkgver() {
+    cd "$srcdir/kiries"
+    local -a log_args=( -n 1 --date-order --format='%at' )
+    [[ $release ]] || release=$(date -d "@$(git log "${log_args[@]}")" +%Y%m%d)
+    # Use the tag of the last commit
+    local cnt="$(git rev-list --count HEAD)"
+    local ver="$(git rev-parse --short HEAD)"
+    printf "%s.%s.%s" "$release" "$cnt" "${ver//-/.}"
+}
+
+build() {
+    cd "$srcdir/kiries"
+    ./bin/lein uberjar
+}
+
+package() {
+    cd "$srcdir/kiries"
+    install -o root -g root -m 0755 -d \
+        "$pkgdir"/etc/conf.d \
+        "$pkgdir"/etc/conf.d \
+        "$pkgdir"/etc/kiries \
+        "$pkgdir"/usr/share/kiries \
+        "$pkgdir"/usr/share/kiries/target \
+        "$pkgdir"/usr/bin \
+        "$pkgdir"/usr/lib/kiries \
+        "$pkgdir"/usr/lib/systemd/system \
+        "$pkgdir"/usr/share/java \
+        "$pkgdir"/var/lib/kiries \
+        "$pkgdir"/var/log/kiries
+
+    cp -a bin resources "$pkgdir"/usr/share/kiries
+    cp config/* "$pkgdir"/etc/kiries/
+    cp "$startdir/kiries.service" "$pkgdir"/usr/lib/systemd/system/kiries.service
+    cp "$startdir/kiries.conf" "$pkgdir"/etc/conf.d/kiries
+
+    mv "$pkgdir"/usr/share/kiries/resources/htdocs/kibana/app/dashboards "$pkgdir"/etc/kiries/dashboards
+    ln -s /etc/kiries/dashboards "$pkgdir"/usr/share/kiries/resources/htdocs/kibana/app/dashboards
+
+    mv "$pkgdir"/usr/share/kiries/resources/htdocs/kibana/config.js "$pkgdir"/etc/kiries/config.js
+    ln -s /etc/kiries/config.js "$pkgdir"/usr/share/kiries/resources/htdocs/kibana/config.js
+
+    ln -s /etc/kiries "$pkgdir"/usr/share/kiries/config
+    ln -s /usr/share/kiries/bin/kiries "$pkgdir"/usr/bin/kiries
+    ln -s /var/lib/kiries "$pkgdir"/usr/share/kiries/data
+    ln -s /var/log/kiries "$pkgdir"/usr/share/kiries/logs
+
+    rm -rf "$pkgdir"/usr/share/kiries/resources/packaging
+
+    for f in target/*.jar; do
+      cp "$f" "$pkgdir/usr/share/java/"
+      ln -s "/usr/share/java/${f##*/}" "$pkgdir/usr/share/kiries/target/${f##*/}"
+    done
+}
