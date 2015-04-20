@@ -3,12 +3,21 @@
 
 ;; ----------------------------------------
 
+(defn ^:private fixup-prefix [prefix default-prefix]
+  (if prefix
+    (if (.endsWith prefix ".")
+      prefix
+      (str prefix "."))
+    default-prefix))
+
 (def clock (com.yammer.metrics.core.Clock/defaultClock))
 (def vm-stats (com.yammer.metrics.core.VirtualMachineMetrics/getInstance))
 
-(defn vm-metrics []
+(defn vm-metrics [& {:keys [:prefix]}]
   (let [epoch
         (long (/ (.time clock) 1000))
+
+        prefix (fixup-prefix prefix "")
 
         metrics
         (concat
@@ -26,4 +35,4 @@
            {:service (str "jvm.gc." k ".time") :metric (.getTime v java.util.concurrent.TimeUnit/MILLISECONDS)})
          (for [[k v] (.garbageCollectors vm-stats)]
            {:service (str "jvm.gc." k ".runs") :metric (.getRuns v)}))]
-    (map #(assoc % :time epoch) metrics)))
+    (map #(assoc % :service (str prefix (:service %)) :time epoch) metrics)))
