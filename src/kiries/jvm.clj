@@ -3,13 +3,6 @@
 
 ;; ----------------------------------------
 
-(defn ^:private fixup-prefix [prefix default-prefix]
-  (if prefix
-    (if (.endsWith prefix ".")
-      prefix
-      (str prefix "."))
-    default-prefix))
-
 (def clock (com.yammer.metrics.core.Clock/defaultClock))
 (def vm-stats (com.yammer.metrics.core.VirtualMachineMetrics/getInstance))
 
@@ -17,7 +10,11 @@
   (let [epoch
         (long (/ (.time clock) 1000))
 
-        prefix (fixup-prefix prefix "")
+        prefix (if prefix
+                  (if (or (.endsWith prefix ".") (empty? prefix))
+                    prefix
+                    (str prefix "."))
+                  "")
 
         metrics
         (concat
