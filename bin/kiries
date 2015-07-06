@@ -97,4 +97,18 @@ newest_jar=${potential_jars[0]}
 for j in "${potential_jars[@]}"; do
     [[ $j -nt $newest_jar ]] && newest_jar=$j
 done
-exec java -cp "$source_dir/resources:$newest_jar" kiries.core "$@"
+
+# Following ant conventions, -X* is a JVM argument as opposed to a kiries
+# argument.  JVM arguments that need to start with -X should thus be passed
+# with -X-X...
+jvm_args=( )
+args=( )
+for arg; do
+    if [[ $arg = -X* ]]; then
+      jvm_args+=( "${arg#-X}" )
+    else
+      args+=( "$arg" )
+    fi
+done
+
+exec java -cp "$source_dir/resources:$newest_jar" "${jvm_args[@]}" kiries.core "${args[@]}"
