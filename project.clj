@@ -31,6 +31,7 @@
                  [com.taoensso/carmine "2.6.2"]
 
                  ;; Resolve dependency version conflicts explicitly
+                 [org.clojure/tools.nrepl "0.2.10"]
                  [org.clojure/tools.reader "0.8.10"]
                  [com.taoensso/encore "1.11.2"]
                  [org.codehaus.plexus/plexus-utils "3.0"]
