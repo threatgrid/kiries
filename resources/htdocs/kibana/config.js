@@ -6,7 +6,7 @@
  */
 define(['settings'],
 function (Settings) {
-  
+  "use strict";
 
   /** @scratch /configuration/config.js/2
    *
