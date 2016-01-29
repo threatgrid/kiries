@@ -23,107 +23,120 @@
       "list": {
         "1": {
           "alias": "waiting",
-          "query": "service:\"jvm.thread.state.waiting\"",
+          "query": "service:\"kiries.jvm.thread.state.waiting\"",
           "color": "#EAB839",
           "pin": true,
           "id": 1,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "2": {
           "alias": "timed_waiting",
-          "query": "service:\"jvm.thread.state.timed_waiting\"",
+          "query": "service:\"kiries.jvm.thread.state.timed_waiting\"",
           "color": "#6ED0E0",
           "pin": true,
           "id": 2,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "3": {
           "alias": "terminated",
-          "query": "service:\"jvm.thread.state.terminated\"",
+          "query": "service:\"kiries.jvm.thread.state.terminated\"",
           "color": "#EF843C",
           "pin": true,
           "id": 3,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "4": {
           "alias": "runnable",
-          "query": "service:\"jvm.thread.state.runnable\"",
+          "query": "service:\"kiries.jvm.thread.state.runnable\"",
           "color": "#508642",
           "pin": true,
           "id": 4,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "5": {
           "alias": "new",
-          "query": "service:\"jvm.thread.state.new\"",
+          "query": "service:\"kiries.jvm.thread.state.new\"",
           "color": "#1F78C1",
           "pin": true,
           "id": 5,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "6": {
           "alias": "blocked",
-          "query": "service:\"jvm.thread.state.blocked\"",
+          "query": "service:\"kiries.jvm.thread.state.blocked\"",
           "color": "#BF1B00",
           "pin": true,
           "id": 6,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "7": {
           "alias": "daemons",
-          "query": "service:\"jvm.thread.daemon-count\"",
+          "query": "service:\"kiries.jvm.thread.daemon-count\"",
           "color": "#705DA0",
           "pin": true,
           "id": 7,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "8": {
           "alias": "threads",
-          "query": "service:\"jvm.thread.count\"",
+          "query": "service:\"kiries.jvm.thread.count\"",
           "color": "#508642",
           "pin": true,
           "id": 8,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "11": {
           "alias": "Code Cache",
-          "query": "service:\"jvm.memory.pool-usage.Code Cache\"",
+          "query": "service:\"kiries.jvm.memory.pool-usage.Code Cache\"",
           "color": "#C15C17",
           "pin": true,
           "id": 11,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "12": {
           "alias": "Perm Gen",
-          "query": "service:\"jvm.memory.pool-usage.CMS Perm Gen\"",
+          "query": "service:\"kiries.jvm.memory.pool-usage.CMS Perm Gen\"",
           "color": "#890F02",
           "pin": true,
           "id": 12,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "14": {
           "alias": "Non Heap",
-          "query": "service:\"jvm.memory.non-heap-usage\"",
+          "query": "service:\"kiries.jvm.memory.non-heap-usage\"",
           "color": "#6D1F62",
           "pin": true,
           "id": 14,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "15": {
           "alias": "Heap",
-          "query": "service:\"jvm.memory.heap-usage\"",
+          "query": "service:\"kiries.jvm.memory.heap-usage\"",
           "color": "#584477",
           "pin": true,
           "id": 15,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         },
         "20": {
           "alias": "FD Usage",
-          "query": "service:\"jvm.fd-usage\"",
+          "query": "service:\"kiries.jvm.fd-usage\"",
           "color": "#F29191",
           "pin": true,
           "id": 20,
-          "type": "lucene"
+          "type": "lucene",
+          "enable": true
         }
       },
       "ids": [
@@ -150,10 +163,10 @@
       ],
       "list": {
         "0": {
-          "from": "2013-10-04T21:28:52.850Z",
-          "to": "2013-10-04T22:28:52.850Z",
-          "field": "@timestamp",
           "type": "time",
+          "field": "@timestamp",
+          "from": "now-15m",
+          "to": "now",
           "mandate": "must",
           "active": true,
           "alias": "",
@@ -234,9 +247,23 @@
             "min": 15
           },
           "filter_id": 0,
-          "status": "Stable"
+          "status": "Stable",
+          "refresh_intervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
+          ],
+          "now": true
         }
-      ]
+      ],
+      "notice": false
     },
     {
       "title": "Graph",
@@ -257,7 +284,7 @@
           "value_field": "metric",
           "auto_int": true,
           "resolution": 200,
-          "interval": "30s",
+          "interval": "1s",
           "fill": 1,
           "linewidth": 3,
           "timezone": "browser",
@@ -281,7 +308,47 @@
               15
             ]
           },
-          "title": "Memory"
+          "title": "Memory",
+          "scale": 1,
+          "y_format": "none",
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "pointradius": 5,
+          "options": true,
+          "show_query": true,
+          "legend_counts": true,
+          "zerofill": true,
+          "derivative": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          }
         },
         {
           "span": 3,
@@ -302,7 +369,7 @@
           "value_field": "metric",
           "auto_int": true,
           "resolution": 100,
-          "interval": "30s",
+          "interval": "10s",
           "fill": 1,
           "linewidth": 1,
           "timezone": "browser",
@@ -317,7 +384,47 @@
           "y-axis": true,
           "percentage": false,
           "interactive": true,
-          "title": "Threads"
+          "title": "Threads",
+          "scale": 1,
+          "y_format": "none",
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "pointradius": 5,
+          "options": true,
+          "show_query": true,
+          "legend_counts": true,
+          "zerofill": true,
+          "derivative": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          }
         },
         {
           "span": 3,
@@ -342,7 +449,7 @@
           "value_field": "metric",
           "auto_int": true,
           "resolution": 100,
-          "interval": "30s",
+          "interval": "10s",
           "fill": 1,
           "linewidth": 1,
           "timezone": "browser",
@@ -357,7 +464,47 @@
           "y-axis": true,
           "percentage": false,
           "interactive": true,
-          "title": "Thread States"
+          "title": "Thread States",
+          "scale": 1,
+          "y_format": "none",
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "pointradius": 5,
+          "options": true,
+          "show_query": true,
+          "legend_counts": true,
+          "zerofill": true,
+          "derivative": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          }
         },
         {
           "span": 3,
@@ -377,7 +524,7 @@
           "value_field": "metric",
           "auto_int": true,
           "resolution": 100,
-          "interval": "30s",
+          "interval": "10s",
           "fill": 0,
           "linewidth": 1,
           "timezone": "browser",
@@ -392,9 +539,50 @@
           "y-axis": true,
           "percentage": false,
           "interactive": true,
-          "title": "FD Usage"
+          "title": "FD Usage",
+          "scale": 1,
+          "y_format": "none",
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "pointradius": 5,
+          "options": true,
+          "show_query": true,
+          "legend_counts": true,
+          "zerofill": true,
+          "derivative": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          }
         }
-      ]
+      ],
+      "notice": false
     },
     {
       "title": "Events",
@@ -455,16 +643,92 @@
           "field_list": true,
           "status": "Stable",
           "trimFactor": 300,
-          "title": "Intake Events"
+          "title": "Events",
+          "all_fields": false,
+          "localTime": false,
+          "timeField": "@timestamp",
+          "normTimes": true
         }
-      ]
+      ],
+      "notice": false
     }
   ],
   "editable": true,
   "index": {
     "interval": "day",
     "pattern": "[jvm-metrics-]YYYY.MM.DD",
-    "default": "NO_TIME_FILTER_OR_INDEX_PATTERN_NOT_MATCHED"
+    "default": "NO_TIME_FILTER_OR_INDEX_PATTERN_NOT_MATCHED",
+    "warm_fields": true
   },
-  "style": "light"
+  "style": "light",
+  "failover": false,
+  "panel_hints": true,
+  "pulldowns": [
+    {
+      "type": "query",
+      "collapse": false,
+      "notice": false,
+      "enable": true,
+      "query": "*",
+      "pinned": true,
+      "history": [],
+      "remember": 10
+    },
+    {
+      "type": "filtering",
+      "collapse": false,
+      "notice": true,
+      "enable": true
+    }
+  ],
+  "nav": [
+    {
+      "type": "timepicker",
+      "collapse": false,
+      "notice": false,
+      "enable": true,
+      "status": "Stable",
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "timefield": "@timestamp",
+      "now": true,
+      "filter_id": 0
+    }
+  ],
+  "loader": {
+    "save_gist": false,
+    "save_elasticsearch": true,
+    "save_local": true,
+    "save_default": true,
+    "save_temp": true,
+    "save_temp_ttl_enable": true,
+    "save_temp_ttl": "30d",
+    "load_gist": false,
+    "load_elasticsearch": true,
+    "load_elasticsearch_size": 20,
+    "load_local": false,
+    "hide": false
+  },
+  "refresh": false
 }

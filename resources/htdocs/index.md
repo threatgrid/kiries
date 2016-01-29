@@ -15,7 +15,7 @@ in [ElasticSearch](http://elasticsearch.org), like
 * Manage your indexes using [ElasticSearchHQ](http://elastic hq.org)
 
 What does all that really mean?  Check it out, Kiries is already
-indexing it's own JVM metrics. You can see that data in the
+indexing its own JVM metrics. You can see that data in the
 [Kiries JVM Metrics Dashboard](kibana/index.html#/dashboard/file/jvm-metrics.json).
 
 ## Getting Data Into Kiries

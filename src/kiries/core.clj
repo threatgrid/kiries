@@ -1,14 +1,13 @@
 (ns kiries.core
   (:gen-class)
-  (:use [clojure.tools.cli]
-        [clojure.tools.logging :only (info error debug warn)])
-  (:require [riemann.config :as ri-config]
-            [riemann.logging :as ri-logging]
-            [riemann.time :as ri-time]
+  (:require [clojure.tools.cli :as cli]
+            [clojure.tools.logging :as log]
+            [kiries.web :as web]
             [riemann.bin :as ri-bin]
             [riemann.config :as ri-config]
+            [riemann.logging :as ri-logging]
             [riemann.pubsub :as ri-pubsub]
-            [kiries.web :as web])
+            [riemann.time :as ri-time])
   (:import org.elasticsearch.node.NodeBuilder))
 
 (defonce es-service (atom nil))
@@ -20,7 +19,6 @@
 
 (defn stop-es []
   (.close (es-service)))
-
 
 (defn start-ri [& argv]
   (ri-logging/init)
@@ -38,41 +36,27 @@
 
 (defn -main [& args]
   (let [[options args banner]
-        (cli args
-             ["-?" "--help" "Show help" :default false :flag true]
-             ["-h" "--host" "Interface to listen on." :default "0.0.0.0"]
-             ["-p" "--port" "Port to listen on." :default 9090 :parse-fn #(Integer. %)]
-             ["-e" "--[no-]elasticsearch" "Run ES internally." :default true :flag true]
-             ["-r" "--[no-]riemann" "Run Riemann internally." :default true :flag true]
-             ["-w" "--[no-]web" "Run webserver/kibana internally." :default true :flag true]
-             )]
+        (cli/cli args
+                 ["-?" "--help" "Show help" :default false :flag true]
+                 ["-h" "--host" "Interface to listen on." :default "0.0.0.0"]
+                 ["-p" "--port" "Port to listen on." :default 9090 :parse-fn #(Integer. %)]
+                 ["-e" "--[no-]elasticsearch" "Run ES internally." :default true :flag true]
+                 ["-r" "--[no-]riemann" "Run Riemann internally." :default true :flag true]
+                 ["-w" "--[no-]web" "Run webserver/kibana internally." :default true :flag true])]
     (when (:help options)
-      (do
-        (println banner)
-        (System/exit 0)))
-    
+      (println banner)
+      (System/exit 0))
+
     (when (:elasticsearch options)
-      (print "Starting elasticsearch")
+      (log/info "Starting elasticsearch\n")
       (start-es))
-    
+
     (when (:riemann options)
-      (print "Starting Riemann")
+      (log/info "Starting Riemann\n")
       (start-ri))
-    
+
     (when (:web options)
-      (print "Starting web server for Kibana")
+      (log/info "Starting web server for Kibana\n")
       (web/start :port (:port options)
                  :join? false
                  :host (:host options)))))
-    
-
-
-
-
-
-
-
-  
-
-
-
