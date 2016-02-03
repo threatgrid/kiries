@@ -229,6 +229,9 @@ index.number_of_replicas: 0
 #
 # http.enabled: false
 
+http.cors.enabled: true
+
+http.cors.allow-origin: /https?:\/\/localhost(:[0-9]+)?/
 
 ################################### Gateway ###################################
 

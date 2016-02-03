@@ -1,11 +1,11 @@
 (ns riemann.elastic
-  (:use [clojure.tools.logging :only (info error debug warn)])
   (:require [clj-json.core :as json]
             [clj-time.format]
             [clj-time.core]
             [clj-time.coerce]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
             [clojurewerkz.elastisch.rest.bulk :as eb]
             [clojurewerkz.elastisch.rest :as esr]
             [riemann.streams :as streams]))
@@ -37,26 +37,25 @@
 (defn ^{:private true} safe-iso8601 [event-s]
   (try (iso8601 event-s)
     (catch Exception e
-      (warn "Unable to parse iso8601 input: " event-s)
+      (log/warn "Unable to parse iso8601 input: " event-s)
       (clj-time.format/unparse format-iso8601 (clj-time.core/now)))))
 
 (defn ^{:private true} stashify-timestamp [event]
-  (->  (if-not (get event "@timestamp")
-         (let [isotime (:isotime event)]
-           (if-not isotime
-             (let [time (:time event)]
-               (assoc event "@timestamp" (safe-iso8601 (long time))))
-             (assoc event "@timestamp" isotime)))
+  (-> (if-not (get event "@timestamp")
+        (assoc event "@timestamp"
+               (if-let [isotime (:isotime event)]
+                 isotime
+                 (if-let [time (:time event)]
+                   (safe-iso8601 (long time))
+                   (clj-time.format/unparse format-iso8601 (clj-time.core/now)))))
          event)
-       (dissoc :isotime)
-       (dissoc :time)
-       (dissoc :ttl)))
+      (dissoc :isotime :time :ttl)))
 
 (defn ^{:private true} edn-safe-read [v]
   (try
     (edn/read-string v)
     (catch Exception e
-      (warn "Unable to read supposed EDN form with value: " v)
+      (log/warn "Unable to read supposed EDN form with value: " v)
       v)))
 
 (defn ^{:private true} massage-event [event]
@@ -83,12 +82,16 @@
        (remove streams/expired?)
        (map #(elastic-event % massage))))
 
+(defonce es-connection (atom nil))
+
 (defn es-connect
   "Connects to the ElasticSearch node.  The optional argument is a url
   for the node, which defaults to `http://localhost:9200`.  This must
   be called before any es-* functions can be used."
   [& argv]
-  (esr/connect! (or (first argv) "http://localhost:9200")))
+  (reset! es-connection
+          (esr/connect (or (first argv) "http://localhost:9200"))))
+
 
 (defn es-index
   "A function which takes a sequence of events, and indexes them in
@@ -99,7 +102,7 @@
   The :index argument defaults to \"logstash\" for Kibana
   compatability.  It's the root ES index name that this event will be
   indexed within.
-  
+
   The :timestamping argument, default to :day and it controls the time
   range component of the index name.  Acceptable values
   are :hour, :day, :week, :month and :year.
@@ -116,9 +119,9 @@
                     timestamping :day}}]
   (let [index-namer (make-index-timestamper index timestamping)]
     (fn [events]
-      (let [esets (group-by (fn [e] 
-                              (index-namer 
-                               (clj-time.format/parse format-iso8601 
+      (let [esets (group-by (fn [e]
+                              (index-namer
+                               (clj-time.format/parse format-iso8601
                                                       (get e "@timestamp"))))
                             (riemann-to-elasticsearch events massage))]
         (doseq [index (keys esets)]
@@ -132,15 +135,15 @@
                             raw)]
             (when (seq bulk-create-items)
               (try
-                (let [res (eb/bulk-with-index index bulk-create-items)
+                (let [res (eb/bulk-with-index @es-connection index bulk-create-items)
                       total (count (:items res))
-                      succ (filter :ok (:items res))
+                      succ (filter #(= 201 (get-in % [:create :status])) (:items res))
                       failed (filter :error (:items res))]
-                  
-                  (info "elasticized" total "/" (count succ) "/" (count failed) " (total/succ/fail) items to index " index "in " (:took res) "ms")
-                  (debug "Failed: " failed))
+                  (log/info (str "elasticized " total "/" (count succ) "/" (- total (count succ))
+                                 " (total/succ/fail) items to index " index " in " (:took res) " ms"))
+                  (log/debug "Failed: " failed))
                 (catch Exception e
-                  (error "Unable to bulk index:" e))))))))))
+                  (log/error "Unable to bulk index:" e))))))))))
 
 (defn ^{:private true} resource-as-json [resource-name]
   (json/parse-string (slurp (io/resource resource-name))))
@@ -150,12 +153,13 @@
   (try
     (json/parse-string (slurp file-name))
     (catch Exception e
-      (error "Exception while reading JSON file: " file-name)
+      (log/error "Exception while reading JSON file: " file-name)
       (throw e))))
 
 
-(defn load-index-template 
+(defn load-index-template
   "Loads the file into ElasticSearch as an index template."
   [template-name mapping-file]
-  (esr/put (esr/index-template-url template-name)
-           :body (file-as-json mapping-file)))
+  (esr/put @es-connection
+           (esr/index-template-url @es-connection template-name)
+           {:body (file-as-json mapping-file)}))
