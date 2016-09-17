@@ -15,8 +15,11 @@ backup=(
 license=( EPL ) # some components, but not all, also under Apache license
 install=kiries.install
 
-source=('kiries::git+http://github.com/threatgrid/kiries#branch=master')
-md5sums=( SKIP )
+source=(
+	'kiries::git+http://github.com/threatgrid/kiries#branch=master'
+	kiries.service kiries.conf
+)
+md5sums=( "${source[@]//*/SKIP}" )
 
 pkgver() {
     cd "$srcdir/kiries"
