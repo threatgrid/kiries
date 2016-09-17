@@ -1,3 +1,9 @@
+# set this to a git revision to build that revision; may also be inherited through environment
+: ${_buildrev:=}
+
+_git_fragment=${_buildrev:+commit=${_buildrev}}
+_git_fragment=${_git_fragment:=branch=master}
+
 pkgname=kiries
 pkgver=20150330.57.0b1e865
 pkgrel=1
@@ -16,7 +22,7 @@ license=( EPL ) # some components, but not all, also under Apache license
 install=kiries.install
 
 source=(
-	'kiries::git+http://github.com/threatgrid/kiries#branch=master'
+	"kiries::git+http://github.com/threatgrid/kiries#${_git_fragment}"
 	kiries.service kiries.conf
 )
 md5sums=( "${source[@]//*/SKIP}" )
