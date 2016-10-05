@@ -38,7 +38,7 @@
   (route/resources "/css/" {:root "htdocs/css"})
 
   ;; Point to our bundled installation of ElasticSearch HQ
-  (route/resources "/HQ/" {:root "htdocs/royrusso-elasticsearch-HQ-ea630c8"})
+  (route/resources "/HQ/" {:root "htdocs/elasticsearch-HQ-release-v1.0.0"})
 
 
   (route/not-found "<h1>Page not found</h1>"))
