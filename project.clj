@@ -1,14 +1,16 @@
 (defproject kiries "0.1.0-SNAPSHOT"
   :description "A bundled deployment of Kibana, Riemann, and ElasticSearch"
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.cli "0.3.3"]
+                 [org.clojure/tools.reader "1.0.0-beta3"]
+                 ^:replace [org.clojure/tools.nrepl "0.2.12"]
 
-                 [riemann "0.2.10"]
+                 [riemann "0.2.11"]
 
                  [clj-json "0.5.3"]
 
                  [clj-time "0.11.0"]
-                 [clojurewerkz/elastisch "2.2.1"]
+                 [clojurewerkz/elastisch "2.2.2"]
 
                  [org.elasticsearch/elasticsearch "1.7.4"]
                  [org.apache.lucene/lucene-expressions "4.10.4"]
@@ -28,12 +30,10 @@
                  [ring/ring-jetty-adapter "1.4.0"]
 
                  ;; Redis integration
-                 [com.taoensso/carmine "2.12.2"]]
+                 [com.taoensso/carmine "2.14.0"]]
 
   :resource-paths ["resources"]
   ;;:jar-exclusions [#"^config"]
   :main kiries.core
   :profiles {:uberjar {:aot :all, :uberjar-merge-with {#"^META-INF/services/" [slurp str spit]}}}
   :aliases {"server" ["trampoline" "run" "-m" "kiries.core"]})
-
-

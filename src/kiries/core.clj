@@ -22,7 +22,7 @@
 
 (defn start-ri [& argv]
   (ri-logging/init)
-  (reset! ri-bin/config-file (or (first argv) "config/riemann.config"))
+  (ri-bin/set-config-file! (or (first argv) "config/riemann.config"))
   (ri-bin/handle-signals)
   (ri-time/start!)
   (ri-config/include @ri-bin/config-file)

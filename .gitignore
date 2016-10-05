@@ -9,5 +9,6 @@ pom.xml.asc
 *.jar
 *.class
 .lein-*
+.nrepl-port
 .*.sw?
 riemann.log*
