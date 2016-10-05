@@ -1,4 +1,4 @@
-(ns riemann.elastic
+(ns kiries.elastic
   (:require [clj-json.core :as json]
             [clj-time.format]
             [clj-time.core]
@@ -82,15 +82,12 @@
        (remove streams/expired?)
        (map #(elastic-event % massage))))
 
-(defonce es-connection (atom nil))
-
 (defn es-connect
   "Connects to the ElasticSearch node.  The optional argument is a url
   for the node, which defaults to `http://localhost:9200`.  This must
   be called before any es-* functions can be used."
   [& argv]
-  (reset! es-connection
-          (esr/connect (or (first argv) "http://localhost:9200"))))
+  (esr/connect (or (first argv) "http://localhost:9200")))
 
 
 (defn es-index
@@ -113,7 +110,7 @@
   internal to Riemann.  Lastly, any fields starting with an `_` will
   have their value parsed as EDN.
 "
-  [doc-type & {:keys [index timestamping massage]
+  [connection doc-type & {:keys [index timestamping massage]
                :or {index "logstash"
                     massage true
                     timestamping :day}}]
@@ -135,7 +132,7 @@
                             raw)]
             (when (seq bulk-create-items)
               (try
-                (let [res (eb/bulk-with-index @es-connection index bulk-create-items)
+                (let [res (eb/bulk-with-index connection index bulk-create-items)
                       total (count (:items res))
                       succ (filter #(= 201 (get-in % [:create :status])) (:items res))
                       failed (filter :error (:items res))]
@@ -144,22 +141,3 @@
                   (log/debug "Failed: " failed))
                 (catch Exception e
                   (log/error "Unable to bulk index:" e))))))))))
-
-(defn ^{:private true} resource-as-json [resource-name]
-  (json/parse-string (slurp (io/resource resource-name))))
-
-
-(defn ^{:private true} file-as-json [file-name]
-  (try
-    (json/parse-string (slurp file-name))
-    (catch Exception e
-      (log/error "Exception while reading JSON file: " file-name)
-      (throw e))))
-
-
-(defn load-index-template
-  "Loads the file into ElasticSearch as an index template."
-  [template-name mapping-file]
-  (esr/put @es-connection
-           (esr/index-template-url @es-connection template-name)
-           {:body (file-as-json mapping-file)}))
