@@ -1,3 +1,9 @@
+# set this to a git revision to build that revision; may also be inherited through environment
+: ${_buildrev:=}
+
+_git_fragment=${_buildrev:+commit=${_buildrev}}
+_git_fragment=${_git_fragment:=branch=master}
+
 pkgname=kiries
 pkgver=20150330.57.0b1e865
 pkgrel=1
@@ -15,8 +21,8 @@ backup=(
 license=( EPL ) # some components, but not all, also under Apache license
 install=kiries.install
 
-source=('kiries::git+http://github.com/threatgrid/kiries#branch=master')
-md5sums=( SKIP )
+source=("kiries::git+http://github.com/threatgrid/kiries#${_git_fragment}")
+md5sums=( "${source[@]//*/SKIP}" )
 
 pkgver() {
     cd "$srcdir/kiries"
@@ -50,8 +56,8 @@ package() {
 
     cp -a bin resources "$pkgdir"/usr/share/kiries
     cp config/* "$pkgdir"/etc/kiries/
-    cp "$startdir/kiries.service" "$pkgdir"/usr/lib/systemd/system/kiries.service
-    cp "$startdir/kiries.conf" "$pkgdir"/etc/conf.d/kiries
+    cp "$srcdir/kiries/resources/packaging/arch-linux/kiries.service" "$pkgdir"/usr/lib/systemd/system/kiries.service
+    cp "$srcdir/kiries/resources/packaging/arch-linux/kiries.conf" "$pkgdir"/etc/conf.d/kiries
 
     mv "$pkgdir"/usr/share/kiries/resources/htdocs/kibana/app/dashboards "$pkgdir"/etc/kiries/dashboards
     ln -s /etc/kiries/dashboards "$pkgdir"/usr/share/kiries/resources/htdocs/kibana/app/dashboards
