@@ -1,7 +1,14 @@
 (ns kiries.redis
-  (:use [clojure.tools.logging :only (info error debug warn)])
-  (:require [taoensso.carmine :as car]
+  (:require [clojure.tools.logging :as log]
+            [taoensso.carmine :as car]
             [clj-json.core :as json]))
+
+(defn key-lengths
+  "Given a redis connection and a pattern ('*' wildcard), return a map
+  of key name to key length."
+  [conn patt]
+  (let [keys (car/wcar conn (car/keys patt))]
+    (zipmap keys (car/wcar conn (doseq [key keys] (car/llen key))))))
 
 (defn spublish
   "Returns a function which takes a sequence of events or other
@@ -15,16 +22,15 @@
                    (fn [e]
                      (try (json/generate-string e)
                           (catch Exception err
-                            (error "Could not coerce event to json (" e "):" err)
+                            (log/error "Could not coerce event to json (" e "):" err)
                             nil)))
                    events))]
       (doseq [je jevents]
         (try
           (car/wcar conn
-                    (car/publish key je)
-                    )
+            (car/publish key je))
           (catch Exception e
-            (warn "Unable to publish" key "to" conn ":" e)))))))
+            (log/warn "Unable to publish" key "to" conn ":" e)))))))
 
 (defn publish
   "Returns a function which publishes a single event as JSON, to the
