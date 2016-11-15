@@ -111,4 +111,4 @@ for arg; do
     fi
 done
 
-exec java -cp "$source_dir/resources:$newest_jar" "${jvm_args[@]}" kiries.core "${args[@]}"
+exec java -cp "$source_dir/resources:$newest_jar" "${jvm_args[@]}" riemann.bin "${args[@]}"
