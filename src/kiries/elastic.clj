@@ -87,7 +87,8 @@
   for the node, which defaults to `http://localhost:9200`.  This must
   be called before any es-* functions can be used."
   [& argv]
-  (esr/connect (or (first argv) "http://localhost:9200")))
+  (esr/connect (or (first argv) "http://localhost:9200")
+               {:content-type "application/x-ndjson"}))
 
 
 (defn es-index
@@ -125,8 +126,8 @@
           (let [raw (get esets index)
                 bulk-create-items
                 (interleave (map #(if-let [id (get % "_id")]
-                                    {:create {:_type doc-type :_id id}}
-                                    {:create {:_type doc-type}}
+                                    {:index {:_type doc-type :_id id}}
+                                    {:index {:_type doc-type}}
                                     )
                                  raw)
                             raw)]
