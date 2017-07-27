@@ -1,10 +1,12 @@
 (ns kiries.elastic
-  (:require [clj-json.core :as json]
+  (:require [cheshire.core :as json]
+            [clj-http.client :as http]
             [clj-time.format]
             [clj-time.core]
             [clj-time.coerce]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as string]
             [clojure.tools.logging :as log]
             [clojurewerkz.elastisch.rest.bulk :as eb]
             [clojurewerkz.elastisch.rest :as esr]
@@ -25,6 +27,18 @@
                                    "-YYYY")))]
     (fn [date]
       (clj-time.format/unparse formatter date))))
+
+(def get-elasticsearch-version
+  (memoize (fn [url]
+             (-> (http/get url)
+                 :body
+                 (json/decode keyword)
+                 (get-in [:version :number])
+                 (string/split #"\D+")
+                 (->> (map #(Integer/parseInt %)))))))
+
+(defn- get-major-version [connection]
+  (first (get-elasticsearch-version (:uri connection))))
 
 (def ^{:private true} format-iso8601
   (clj-time.format/with-zone (clj-time.format/formatters :date-time)
@@ -91,6 +105,16 @@
                {:content-type "application/x-ndjson"}))
 
 
+(defn- parse-1x-bulk-results [res]
+  {:total (count (:items res))
+   :succ (filter #(= 201 (get-in % [:create :status])) (:items res))
+   :failed (filter :error (:items res))})
+
+(defn- parse-5x-bulk-results [res]
+  {:total (count (:items res))
+   :succ (filter #(= 201 (get-in % [:index :status])) (:items res))
+   :failed (remove #(get-in % [:index "created"]) (:items res))})
+
 (defn es-index
   "A function which takes a sequence of events, and indexes them in
   ElasticSearch.  It will set the `_type` field of the event to the
@@ -112,9 +136,9 @@
   have their value parsed as EDN.
 "
   [connection doc-type & {:keys [index timestamping massage]
-               :or {index "logstash"
-                    massage true
-                    timestamping :day}}]
+                          :or {index "logstash"
+                               massage true
+                               timestamping :day}}]
   (let [index-namer (make-index-timestamper index timestamping)]
     (fn [events]
       (let [esets (group-by (fn [e]
@@ -127,16 +151,15 @@
                 bulk-create-items
                 (interleave (map #(if-let [id (get % "_id")]
                                     {:create {:_type doc-type :_id id}}
-                                    {:index {:_type doc-type}}
-                                    )
+                                    {:index {:_type doc-type}})
                                  raw)
                             raw)]
             (when (seq bulk-create-items)
               (try
                 (let [res (eb/bulk-with-index connection index bulk-create-items)
-                      total (count (:items res))
-                      succ (filter #(= 201 (get-in % [:create :status])) (:items res))
-                      failed (filter :error (:items res))]
+                      {:keys [total succ failed]} (if (= 5 (get-major-version connection))
+                                                    (parse-5x-bulk-results res)
+                                                    (parse-1x-bulk-results res))]
                   (log/info (str "elasticized " total "/" (count succ) "/" (- total (count succ))
                                  " (total/succ/fail) items to index " index " in " (:took res) " ms"))
                   (log/debug "Failed: " failed))
