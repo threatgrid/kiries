@@ -8,7 +8,7 @@
                  [org.clojure/clojure "1.8.0"]
                  [cheshire "5.7.0"]
                  [org.clojure/tools.reader "1.0.3"]
-                 [org.clojars.jcsims/riemann "0.2.15"]]
+                 [org.clojars.jcsims/riemann "0.2.16"]]
   :main riemann.bin
   :profiles {:uberjar {:aot :all,}}
   :aliases {"server" ["trampoline" "run" "-m" "riemann.bin" "config/riemann.config"]})
