@@ -104,7 +104,6 @@
   (esr/connect (or (first argv) "http://localhost:9200")
                {:content-type "application/x-ndjson"}))
 
-
 (defn- parse-1x-bulk-results [res]
   {:total (count (:items res))
    :succ (filter #(= 201 (get-in % [:create :status])) (:items res))
@@ -114,6 +113,17 @@
   {:total (count (:items res))
    :succ (filter #(= 201 (get-in % [:index :status])) (:items res))
    :failed (remove #(get-in % [:index "created"]) (:items res))})
+
+(defn- parse-6x-bulk-results [res]
+  {:total (count (:items res))
+   :succ (filter #(= 201 (get-in % [:index :status])) (:items res))
+   :failed (remove #(= "created" (get-in % [:index :result])) (:items res))})
+
+(defn- parse-bulk-results [major-version res]
+  (case major-version
+    (1 2) (parse-1x-bulk-results res)
+    5 (parse-5x-bulk-results res)
+    6 (parse-6x-bulk-results res)))
 
 (defn es-index
   "A function which takes a sequence of events, and indexes them in
@@ -157,9 +167,8 @@
             (when (seq bulk-create-items)
               (try
                 (let [res (eb/bulk-with-index connection index bulk-create-items)
-                      {:keys [total succ failed]} (if (= 5 (get-major-version connection))
-                                                    (parse-5x-bulk-results res)
-                                                    (parse-1x-bulk-results res))]
+                      {:keys [total succ failed]}
+                      (parse-bulk-results (get-major-version connection) res)]
                   (log/info (str "elasticized " total "/" (count succ) "/" (- total (count succ))
                                  " (total/succ/fail) items to index " index " in " (:took res) " ms"))
                   (log/debug "Failed: " failed))
