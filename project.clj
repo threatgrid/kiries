@@ -8,7 +8,7 @@
                  [org.clojure/clojure "1.8.0"]
                  [cheshire "5.7.0"]
                  [org.clojure/tools.reader "1.0.3"]
-                 [org.clojars.jcsims/riemann "0.2.16"]]
+                 [org.clojars.jcsims/riemann "0.2.17"]]
   :repositories [["redhat" "https://maven.repository.redhat.com/ga"]]
   :main riemann.bin
   :profiles {:uberjar {:aot :all,}}
