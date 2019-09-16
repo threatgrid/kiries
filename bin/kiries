@@ -14,8 +14,7 @@ _resolve_symlinks() {
     _assert_no_path_cycles "$@" || return
 
     local dir_context path
-    path=$(readlink -- "$1")
-    if [ $? -eq 0 ]; then
+    if path=$(readlink -- "$1"); then
         dir_context=$(dirname -- "$1")
         _resolve_symlinks "$(_prepend_dir_context_if_necessary "$dir_context" "$path")" "$@"
     else
@@ -77,26 +76,9 @@ shopt -s nullglob
 export LEIN_HOME=${KIRIES_LEIN_HOME:-"$HOME/.lein-kiries"}
 
 # Find location of executable; move to base
-bin_dir=$(realpath "$BASH_SOURCE" 2>/dev/null)
+bin_dir=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null)
 source_dir=${bin_dir%/bin/*}
 cd "$source_dir" || exit
-
-# If a source directory exists, honor it
-if [[ -e src ]]; then
-    exec bin/lein run -- "$@"
-fi
-
-# Otherwise, use the newest available uberjar
-potential_jars=( target/kiries-*standalone.jar )
-if (( ${#potential_jars[@]} == 0 )); then
-    echo "ERROR: No source directory, and no uberjar found" >&2
-    exit 1
-fi
-
-newest_jar=${potential_jars[0]}
-for j in "${potential_jars[@]}"; do
-    [[ $j -nt $newest_jar ]] && newest_jar=$j
-done
 
 # Following ant conventions, -X* is a JVM argument as opposed to a kiries
 # argument.  JVM arguments that need to start with -X should thus be passed
@@ -111,4 +93,26 @@ for arg; do
     fi
 done
 
-exec java -cp "$source_dir/resources:$newest_jar" "${jvm_args[@]}" riemann.bin "${args[@]}"
+if (( ${#jvm_args[@]} )); then
+    printf -v JAVA_TOOL_OPTIONS '%q ' "${jvm_args[@]}"
+    export JAVA_TOOL_OPTIONS
+fi
+
+# If a source directory exists, honor it
+if [[ -e src ]]; then
+    exec bin/lein run -- "${args[@]}"
+fi
+
+# Otherwise, use the newest available uberjar
+potential_jars=( target/kiries-*standalone.jar )
+if (( ${#potential_jars[@]} == 0 )); then
+    echo "ERROR: No source directory, and no uberjar found" >&2
+    exit 1
+fi
+
+newest_jar=${potential_jars[0]}
+for j in "${potential_jars[@]}"; do
+    [[ $j -nt $newest_jar ]] && newest_jar=$j
+done
+
+exec java -cp "$source_dir/resources:$newest_jar" riemann.bin "${args[@]}"
