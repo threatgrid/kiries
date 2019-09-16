@@ -80,9 +80,27 @@ bin_dir=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null)
 source_dir=${bin_dir%/bin/*}
 cd "$source_dir" || exit
 
+# Following ant conventions, -X* is a JVM argument as opposed to a kiries
+# argument.  JVM arguments that need to start with -X should thus be passed
+# with -X-X...
+jvm_args=( )
+args=( )
+for arg; do
+    if [[ $arg = -X* ]]; then
+      jvm_args+=( "${arg#-X}" )
+    else
+      args+=( "$arg" )
+    fi
+done
+
+if (( ${#jvm_args[@]} )); then
+    printf -v JAVA_TOOL_OPTIONS '%q ' "${jvm_args[@]}"
+    export JAVA_TOOL_OPTIONS
+fi
+
 # If a source directory exists, honor it
 if [[ -e src ]]; then
-    exec bin/lein run -- "$@"
+    exec bin/lein run -- "${args[@]}"
 fi
 
 # Otherwise, use the newest available uberjar
@@ -97,17 +115,4 @@ for j in "${potential_jars[@]}"; do
     [[ $j -nt $newest_jar ]] && newest_jar=$j
 done
 
-# Following ant conventions, -X* is a JVM argument as opposed to a kiries
-# argument.  JVM arguments that need to start with -X should thus be passed
-# with -X-X...
-jvm_args=( )
-args=( )
-for arg; do
-    if [[ $arg = -X* ]]; then
-      jvm_args+=( "${arg#-X}" )
-    else
-      args+=( "$arg" )
-    fi
-done
-
-exec java -cp "$source_dir/resources:$newest_jar" "${jvm_args[@]}" riemann.bin "${args[@]}"
+exec java -cp "$source_dir/resources:$newest_jar" riemann.bin "${args[@]}"
