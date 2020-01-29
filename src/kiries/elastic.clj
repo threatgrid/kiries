@@ -97,12 +97,21 @@
        (map #(elastic-event % massage))))
 
 (defn es-connect
-  "Connects to the ElasticSearch node.  The optional argument is a url
-  for the node, which defaults to `http://localhost:9200`.  This must
-  be called before any es-* functions can be used."
-  [& argv]
-  (esr/connect (or (first argv) "http://localhost:9200")
-               {:content-type "application/x-ndjson"}))
+  "Connects to the ElasticSearch node.
+
+  The first optional argument is a url for the node, which defaults to
+  `http://localhost:9200`.  The second optional arg is a map of
+  options to be passed to clj-http.
+
+  This must be called before any es-* functions can be used."
+  ([]
+   (es-connect "http://localhost:9200"))
+  ([host]
+   (es-connect host nil))
+  ([host http-opts]
+   (esr/connect host
+                (merge {:content-type "application/x-ndjson"}
+                       http-opts))))
 
 (defn- parse-1x-bulk-results [res]
   {:total (count (:items res))
