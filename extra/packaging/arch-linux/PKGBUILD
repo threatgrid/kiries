@@ -1,0 +1,69 @@
+# set this to a git revision to build that revision; may also be inherited through environment
+: ${_buildrev:=}
+
+_git_fragment=${_buildrev:+commit=${_buildrev}}
+_git_fragment=${_git_fragment:=branch=master}
+
+pkgname=kiries
+pkgver=20180110.92.860108a
+pkgrel=1
+pkgdesc="Kibana/Riemann/ElasticSearch Deployment"
+arch=( any )
+backup=(
+    etc/kiries/config.js
+    etc/kiries/riemann.config
+)
+license=( EPL ) # some components, but not all, also under Apache license
+install=kiries.install
+
+source=("kiries::git+https://github.com/threatgrid/kiries#${_git_fragment}" kiries.service kiries.conf )
+md5sums=( "${source[@]//*/SKIP}" )
+
+pkgver() {
+    cd "$srcdir/kiries"
+    local -a log_args=( -n 1 --date-order --format='%at' )
+    [[ $release ]] || release=$(date -d "@$(git log "${log_args[@]}")" +%Y%m%d)
+    # Use the tag of the last commit
+    local cnt="$(git rev-list --count HEAD)"
+    local ver="$(git rev-parse --short HEAD)"
+    printf "%s.%s.%s" "$release" "$cnt" "${ver//-/.}"
+}
+
+build() {
+    cd "$srcdir/kiries"
+    ./bin/lein uberjar
+}
+
+package() {
+    cd "$srcdir/kiries"
+    install -o root -g root -m 0755 -d \
+        "$pkgdir"/etc/conf.d \
+        "$pkgdir"/etc/conf.d \
+        "$pkgdir"/etc/kiries \
+        "$pkgdir"/usr/share/kiries \
+        "$pkgdir"/usr/share/kiries/target \
+        "$pkgdir"/usr/bin \
+        "$pkgdir"/usr/lib/kiries \
+        "$pkgdir"/usr/lib/systemd/system \
+        "$pkgdir"/usr/share/java \
+        "$pkgdir"/var/lib/kiries \
+        "$pkgdir"/var/log/kiries
+
+    cp -a bin "$pkgdir"/usr/share/kiries
+    cp config/* "$pkgdir"/etc/kiries/
+    cp "$srcdir/kiries.service" "$pkgdir"/usr/lib/systemd/system/kiries.service
+    cp "$srcdir/kiries.conf" "$pkgdir"/etc/conf.d/kiries
+
+    ln -s /etc/kiries/riemann.config "$pkgdir"/usr/share/kiries/riemann.config
+    ln -s /etc/kiries "$pkgdir"/usr/share/kiries/config
+    ln -s /usr/share/kiries/bin/kiries "$pkgdir"/usr/bin/kiries
+    ln -s /var/lib/kiries "$pkgdir"/usr/share/kiries/data
+    ln -s /var/log/kiries "$pkgdir"/usr/share/kiries/logs
+
+    for f in target/*.jar; do
+      cp "$f" "$pkgdir/usr/share/java/"
+      ln -s "/usr/share/java/${f##*/}" "$pkgdir/usr/share/kiries/target/${f##*/}"
+    done
+}
+
+# vim: ai et sts=4 sw=4 ts=4
